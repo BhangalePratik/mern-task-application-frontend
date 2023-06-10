@@ -1,6 +1,6 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Button from "react-bootstrap/Button";
+import { Button } from "react-bootstrap";
 import PropTypes from "prop-types";
 
 function TaskListAndButton(props) {
