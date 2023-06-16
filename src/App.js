@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, Navbar } from "react-bootstrap";
+import axios from "axios";
 
 import "./App.css";
 import NewTaskForm from "./NewTaskForm/NewTaskForm";
@@ -23,7 +24,20 @@ function App() {
 
   const handleLogout = (e) => {
     e.preventDefault();
-    setIsLoggedIn(false);
+    axios
+      .post(
+        "http://localhost:8080/users/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+          },
+        }
+      )
+      .then(() => {
+        localStorage.removeItem("jwtToken");
+        setIsLoggedIn(false);
+      });
   };
 
   return (

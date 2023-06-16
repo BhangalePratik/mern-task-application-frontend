@@ -2,17 +2,43 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "react-bootstrap";
 import PropTypes from "prop-types";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import axios from "axios";
+import filterTask from "../Helpers/filterTask";
 
 function TaskListAndButton(props) {
   const { tasks, setShowForm, setTasks, setTask } = props;
+
+  let backendTasks = [];
+  axios
+    .get("http://localhost:8080/tasks", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+      },
+    })
+    .then((response) => {
+      backendTasks = response.data;
+
+      setTasks(backendTasks.map((backendTask) => filterTask(backendTask)));
+    });
 
   const handleUpdate = (task) => {
     setShowForm(true);
     setTask(task);
   };
 
-  const handleDelete = (id) => {
-    setTasks(() => tasks.filter((task) => task.id !== id));
+  const handleDelete = async (id) => {
+    axios
+      .delete(`http://localhost:8080/tasks/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          setTasks(() => tasks.filter((task) => task.id !== id));
+        }
+      });
   };
 
   return (
@@ -64,10 +90,10 @@ TaskListAndButton.propTypes = {
   tasks: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
-      date: PropTypes.string.isRequired,
-      time: PropTypes.string.isRequired,
+      date: PropTypes.string,
+      time: PropTypes.string,
       title: PropTypes.string.isRequired,
-      details: PropTypes.string.isRequired,
+      details: PropTypes.string,
     })
   ).isRequired,
   setShowForm: PropTypes.func.isRequired,

@@ -1,6 +1,8 @@
 import React from "react";
 import { Container, Form, Button } from "react-bootstrap";
 import PropTypes from "prop-types";
+// eslint-disable-next-line import/no-extraneous-dependencies
+import axios from "axios";
 
 function SignUpForm(props) {
   const {
@@ -11,11 +13,23 @@ function SignUpForm(props) {
     setIsSignedUp,
     setIsLoggedIn,
   } = props;
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
+    const response = await axios.post(
+      "http://localhost:8080/users/signup",
+      {
+        email,
+        password,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    localStorage.setItem("jwtToken", response.data);
     setIsSignedUp(true);
     setIsLoggedIn(true);
-    // Perform signup logic with email and password
   };
 
   const logInUser = (e) => {

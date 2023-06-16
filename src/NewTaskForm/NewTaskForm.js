@@ -6,8 +6,6 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import filterTask from "../Helpers/filterTask";
 
-("src/Helpers/filterTask.js");
-
 function NewTaskForm(props) {
   const { tasks, setTasks, setShowForm, task, setTask } = props;
 
