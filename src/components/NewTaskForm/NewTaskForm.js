@@ -2,15 +2,21 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import PropTypes from "prop-types";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import filterTask from "../Helpers/filterTask";
+import filterTask from "../../Helpers/filterTask";
+import { setTask } from "../../features/task";
+import { setTasks } from "../../features/tasks";
+import { setShowForm } from "../../features/showForm";
 
-function NewTaskForm(props) {
-  const { tasks, setTasks, setShowForm, task, setTask } = props;
+function NewTaskForm() {
+  const dispatch = useDispatch();
+  const task = useSelector((state) => state.task);
+  const tasks = useSelector((state) => state.tasks);
+  // const { tasks, setTasks, setShowForm, task, setTask } = props;
 
   const handleInputChange = (e) => {
-    setTask({ ...task, [e.target.name]: e.target.value });
+    dispatch(setTask({ ...task, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
@@ -26,16 +32,18 @@ function NewTaskForm(props) {
         .then((response) => {
           const backendTask = response.data;
 
-          setTask(() => filterTask(backendTask));
-          setTasks(tasks.map((t) => (t.id === task.id ? task : t)));
-          setTask({
-            id: "",
-            date: "",
-            time: "",
-            title: "",
-            details: "",
-          });
-          setShowForm(false);
+          dispatch(setTask(() => filterTask(backendTask)));
+          dispatch(setTasks(tasks.map((t) => (t.id === task.id ? task : t))));
+          dispatch(
+            setTask({
+              id: "",
+              date: "",
+              time: "",
+              title: "",
+              details: "",
+            })
+          );
+          dispatch(setShowForm(false));
         });
     } else {
       // task is added newly, assign id to it and add in task list
@@ -48,22 +56,24 @@ function NewTaskForm(props) {
         .then((response) => {
           const backendTask = response.data;
 
-          setTask(() => filterTask(backendTask));
-          setTasks([...tasks, task]);
-          setTask({
-            id: "",
-            date: "",
-            time: "",
-            title: "",
-            details: "",
-          });
-          setShowForm(false);
+          dispatch(setTask(() => filterTask(backendTask)));
+          dispatch(setTasks([...tasks, task]));
+          dispatch(
+            setTask({
+              id: "",
+              date: "",
+              time: "",
+              title: "",
+              details: "",
+            })
+          );
+          dispatch(setShowForm(false));
         });
     }
   };
 
   const handleReset = () => {
-    setShowForm(false);
+    dispatch(setShowForm(false));
   };
 
   return (
@@ -120,26 +130,5 @@ function NewTaskForm(props) {
     </>
   );
 }
-NewTaskForm.propTypes = {
-  tasks: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      date: PropTypes.string,
-      time: PropTypes.string,
-      title: PropTypes.string.isRequired,
-      details: PropTypes.string,
-    })
-  ).isRequired,
-  setTasks: PropTypes.func.isRequired,
-  setShowForm: PropTypes.func.isRequired,
-  task: PropTypes.shape({
-    id: PropTypes.string,
-    date: PropTypes.string,
-    time: PropTypes.string,
-    title: PropTypes.string.isRequired,
-    details: PropTypes.string,
-  }).isRequired,
-  setTask: PropTypes.func.isRequired,
-};
 
 export default NewTaskForm;

@@ -1,18 +1,19 @@
 import React from "react";
 import { Container, Form, Button } from "react-bootstrap";
-import PropTypes from "prop-types";
+import { useDispatch, useSelector } from "react-redux";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import axios from "axios";
 
-function SignUpForm(props) {
-  const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    setIsSignedUp,
-    setIsLoggedIn,
-  } = props;
+import {
+  setEmail,
+  setPassword,
+  setIsLoggedIn,
+  setIsSignedUp,
+} from "../../features/user";
+
+function SignUpForm() {
+  const dispatch = useDispatch();
+  const { email, password } = useSelector((state) => state.user);
   const handleSignup = async (e) => {
     e.preventDefault();
     const response = await axios.post(
@@ -28,13 +29,13 @@ function SignUpForm(props) {
       }
     );
     localStorage.setItem("jwtToken", response.data);
-    setIsSignedUp(true);
-    setIsLoggedIn(true);
+    dispatch(setIsSignedUp(true));
+    dispatch(setIsLoggedIn(true));
   };
 
   const logInUser = (e) => {
     e.preventDefault();
-    setIsSignedUp(true);
+    dispatch(setIsSignedUp(true));
   };
 
   return (
@@ -47,7 +48,7 @@ function SignUpForm(props) {
             type="email"
             placeholder="Enter email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => dispatch(setEmail(e.target.value))}
           />
         </Form.Group>
         <Form.Group controlId="formPassword">
@@ -56,7 +57,7 @@ function SignUpForm(props) {
             type="password"
             placeholder="Password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => dispatch(setPassword(e.target.value))}
           />
         </Form.Group>
         <Button variant="primary" type="submit" className="my-2">
@@ -78,12 +79,4 @@ function SignUpForm(props) {
   );
 }
 
-SignUpForm.propTypes = {
-  email: PropTypes.string.isRequired,
-  setEmail: PropTypes.func.isRequired,
-  password: PropTypes.string.isRequired,
-  setPassword: PropTypes.func.isRequired,
-  setIsSignedUp: PropTypes.func.isRequired,
-  setIsLoggedIn: PropTypes.func.isRequired,
-};
 export default SignUpForm;

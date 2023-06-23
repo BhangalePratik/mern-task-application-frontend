@@ -1,15 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
 import { Container, Form, Button } from "react-bootstrap";
-import PropTypes from "prop-types";
+import { useDispatch, useSelector } from "react-redux";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import axios from "axios";
 
 import SignUpForm from "../SignUpForm/SignUpForm";
 import "./LoginForm.css";
+import {
+  setEmail,
+  setPassword,
+  setIsLoggedIn,
+  setIsSignedUp,
+} from "../../features/user";
 
-function LoginForm(props) {
-  const { email, setEmail, password, setPassword, setIsLoggedIn } = props;
-  const [isSignedUp, setIsSignedUp] = useState(true);
+function LoginForm() {
+  const dispatch = useDispatch();
+  const { email, password, isSignedUp } = useSelector((state) => state.user);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,12 +32,12 @@ function LoginForm(props) {
       }
     );
     localStorage.setItem("jwtToken", response.data);
-    setIsLoggedIn(true);
+    dispatch(setIsLoggedIn(true));
   };
 
   const signUpUser = (e) => {
     e.preventDefault();
-    setIsSignedUp(false);
+    dispatch(setIsSignedUp(false));
   };
 
   return (
@@ -46,7 +52,7 @@ function LoginForm(props) {
                 type="email"
                 placeholder="Enter email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => dispatch(setEmail(e.target.value))}
               />
             </Form.Group>
             <Form.Group controlId="formPassword">
@@ -55,7 +61,7 @@ function LoginForm(props) {
                 type="password"
                 placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => dispatch(setPassword(e.target.value))}
               />
             </Form.Group>
             <Button variant="primary" type="submit" className="my-2">
@@ -75,25 +81,10 @@ function LoginForm(props) {
           </Form>
         </Container>
       ) : (
-        <SignUpForm
-          email={email}
-          setEmail={setEmail}
-          password={password}
-          setPassword={setPassword}
-          setIsSignedUp={setIsSignedUp}
-          setIsLoggedIn={setIsLoggedIn}
-        />
+        <SignUpForm />
       )}
     </div>
   );
 }
-
-LoginForm.propTypes = {
-  email: PropTypes.string.isRequired,
-  password: PropTypes.string.isRequired,
-  setEmail: PropTypes.func.isRequired,
-  setPassword: PropTypes.func.isRequired,
-  setIsLoggedIn: PropTypes.func.isRequired,
-};
 
 export default LoginForm;

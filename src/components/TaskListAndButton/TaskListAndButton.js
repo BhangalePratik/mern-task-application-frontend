@@ -1,30 +1,39 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "react-bootstrap";
-import PropTypes from "prop-types";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import axios from "axios";
-import filterTask from "../Helpers/filterTask";
+import { useDispatch, useSelector } from "react-redux";
+import filterTask from "../../Helpers/filterTask";
+import { setShowForm } from "../../features/showForm";
+import { setTasks } from "../../features/tasks";
+import { setTask } from "../../features/task";
 
-function TaskListAndButton(props) {
-  const { tasks, setShowForm, setTasks, setTask } = props;
+function TaskListAndButton() {
+  // const { tasks, setShowForm, setTasks, setTask } = props;
+  const dispatch = useDispatch();
+  const tasks = useSelector((state) => state.tasks);
 
-  let backendTasks = [];
-  axios
-    .get("http://localhost:8080/tasks", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
-      },
-    })
-    .then((response) => {
-      backendTasks = response.data;
+  useEffect(() => {
+    let backendTasks = [];
+    axios
+      .get("http://localhost:8080/tasks", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("jwtToken")}`,
+        },
+      })
+      .then((response) => {
+        backendTasks = response.data;
 
-      setTasks(backendTasks.map((backendTask) => filterTask(backendTask)));
-    });
+        dispatch(
+          setTasks(backendTasks.map((backendTask) => filterTask(backendTask)))
+        );
+      });
+  }, []);
 
   const handleUpdate = (task) => {
-    setShowForm(true);
-    setTask(task);
+    dispatch(setShowForm(true));
+    dispatch(setTask(task));
   };
 
   const handleDelete = async (id) => {
@@ -36,7 +45,7 @@ function TaskListAndButton(props) {
       })
       .then((response) => {
         if (response.status === 200) {
-          setTasks(() => tasks.filter((task) => task.id !== id));
+          dispatch(setTasks(tasks.filter((task) => task.id !== id)));
         }
       });
   };
@@ -77,7 +86,7 @@ function TaskListAndButton(props) {
       <Button
         variant="primary"
         type="submit"
-        onClick={() => setShowForm(true)}
+        onClick={() => dispatch(setShowForm(true))}
         className="rounded-circle position-absolute bottom-50"
       >
         +
@@ -85,20 +94,5 @@ function TaskListAndButton(props) {
     </>
   );
 }
-
-TaskListAndButton.propTypes = {
-  tasks: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      date: PropTypes.string,
-      time: PropTypes.string,
-      title: PropTypes.string.isRequired,
-      details: PropTypes.string,
-    })
-  ).isRequired,
-  setShowForm: PropTypes.func.isRequired,
-  setTasks: PropTypes.func.isRequired,
-  setTask: PropTypes.func.isRequired,
-};
 
 export default TaskListAndButton;
