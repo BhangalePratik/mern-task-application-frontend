@@ -9,20 +9,12 @@ import NewTaskForm from "./components/NewTaskForm/NewTaskForm";
 import TaskListAndButton from "./components/TaskListAndButton/TaskListAndButton";
 import LoginForm from "./components/LoginForm/LoginForm";
 import { setIsLoggedIn } from "./features/user";
+// import TrialForm from "./components/TrialForm";
 
 function App() {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const showForm = useSelector((state) => state.showForm);
-  // const [tasks, setTasks] = useState([]);
-  // const [showForm, setShowForm] = useState(false);
-  // const [task, setTask] = useState({
-  //   id: "",
-  //   date: "",
-  //   time: "",
-  //   title: "",
-  //   details: "",
-  // });
 
   const handleLogout = (e) => {
     e.preventDefault();
@@ -76,6 +68,7 @@ function App() {
         </div>
       ) : (
         <LoginForm />
+        // <TrialForm />
       )}
     </div>
   );

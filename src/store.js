@@ -4,6 +4,8 @@ import user from "./features/user";
 import task from "./features/task";
 import tasks from "./features/tasks";
 import showForm from "./features/showForm";
+import taskAction from "./features/taskAction";
+import submitForm from "./features/submitForm";
 
 const store = configureStore({
   reducer: {
@@ -11,6 +13,8 @@ const store = configureStore({
     task,
     tasks,
     showForm,
+    taskAction,
+    submitForm,
   },
 });
 

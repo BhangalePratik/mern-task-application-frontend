@@ -8,6 +8,7 @@ import filterTask from "../../Helpers/filterTask";
 import { setShowForm } from "../../features/showForm";
 import { setTasks } from "../../features/tasks";
 import { setTask } from "../../features/task";
+import { setActionToPerform } from "../../features/taskAction";
 
 function TaskListAndButton() {
   // const { tasks, setShowForm, setTasks, setTask } = props;
@@ -31,9 +32,15 @@ function TaskListAndButton() {
       });
   }, []);
 
-  const handleUpdate = (task) => {
+  const handleInsertion = () => {
+    dispatch(setActionToPerform("insert"));
     dispatch(setShowForm(true));
+  };
+
+  const handleUpdate = (task) => {
+    dispatch(setActionToPerform("update"));
     dispatch(setTask(task));
+    dispatch(setShowForm(true));
   };
 
   const handleDelete = async (id) => {
@@ -86,7 +93,7 @@ function TaskListAndButton() {
       <Button
         variant="primary"
         type="submit"
-        onClick={() => dispatch(setShowForm(true))}
+        onClick={() => handleInsertion()}
         className="rounded-circle position-absolute bottom-50"
       >
         +
