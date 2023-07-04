@@ -1,24 +1,28 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import React from "react";
-import { Container, Form, Button } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Formik, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import Button from "react-bootstrap/Button";
+import { Container, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import axios from "axios";
 
-import SignUpForm from "../SignUpForm/SignUpForm";
+import { setIsLoggedIn, setIsSignedUp } from "../../features/user";
 import "./LoginForm.css";
-import {
-  setEmail,
-  setPassword,
-  setIsLoggedIn,
-  setIsSignedUp,
-} from "../../features/user";
+import SignUpForm from "../SignUpForm/SignUpForm";
+
+const validationSchema = Yup.object().shape({
+  email: Yup.string()
+    .email("Please enter proper email id!!!")
+    .required("Email is required"),
+  password: Yup.string().required("Password is required"),
+});
 
 function LoginForm() {
+  const isSignedUp = useSelector((state) => state.user.isSignedUp);
   const dispatch = useDispatch();
-  const { email, password, isSignedUp } = useSelector((state) => state.user);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const handleLogin = async ({ email, password }) => {
     const response = await axios.post(
       "http://localhost:8080/users/login",
       {
@@ -35,55 +39,88 @@ function LoginForm() {
     dispatch(setIsLoggedIn(true));
   };
 
-  const signUpUser = (e) => {
-    e.preventDefault();
+  const signUpUser = () => {
     dispatch(setIsSignedUp(false));
   };
 
   return (
-    <div>
+    <Container className="w-50">
       {isSignedUp ? (
-        <Container className="w-50">
-          <h1 className="text-center">Login</h1>
-          <Form onSubmit={handleLogin}>
-            <Form.Group controlId="formEmail">
-              <Form.Label>Email address</Form.Label>
-              <Form.Control
-                type="email"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => dispatch(setEmail(e.target.value))}
-              />
-            </Form.Group>
-            <Form.Group controlId="formPassword">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => dispatch(setPassword(e.target.value))}
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit" className="my-2">
-              Login
-            </Button>
-            <p>
-              If you haven&apos;t created an account, please&nbsp;
-              <Button
-                variant="link"
-                onClick={signUpUser}
-                className="text-decoration-underline p-0"
-              >
-                signup
-              </Button>
-              .
-            </p>
-          </Form>
-        </Container>
+        <>
+          <h2 className="text-center">Login</h2>
+          <Formik
+            initialValues={{
+              email: "",
+              password: "",
+            }}
+            validationSchema={validationSchema}
+            validateOnChange
+            onSubmit={handleLogin}
+          >
+            {(formik) => (
+              <Form onSubmit={formik.handleSubmit}>
+                <Form.Group className="mb-3" controlId="email">
+                  <Form.Label>Email</Form.Label>
+                  <Field
+                    type="email"
+                    name="email"
+                    as={Form.Control}
+                    className={
+                      formik.errors.email ? "border border-danger" : ""
+                    }
+                  />
+                  <ErrorMessage
+                    name="email"
+                    component={Form.Text}
+                    className="text-danger"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3" controlId="password">
+                  <Form.Label>Password</Form.Label>
+                  <Field
+                    type="text"
+                    name="password"
+                    as={Form.Control}
+                    className={
+                      formik.errors.password && formik.touched.title
+                        ? "border border-danger"
+                        : ""
+                    }
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component={Form.Text}
+                    className="text-danger"
+                  />
+                </Form.Group>
+
+                <Button
+                  variant="primary"
+                  type="submit"
+                  disabled={!formik.isValid}
+                >
+                  Login
+                </Button>
+                <p>
+                  If you have created an account, please&nbsp;
+                  <Button
+                    variant="link"
+                    onClick={signUpUser}
+                    className="text-decoration-underline p-0"
+                  >
+                    Sign Up
+                  </Button>
+                  .
+                </p>
+              </Form>
+            )}
+          </Formik>
+        </>
       ) : (
         <SignUpForm />
       )}
-    </div>
+    </Container>
   );
 }
 
