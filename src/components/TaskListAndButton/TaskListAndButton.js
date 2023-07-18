@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "react-bootstrap";
+import Alert from "react-bootstrap/Alert";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,14 +10,21 @@ import { setShowForm } from "../../features/showForm";
 import { setTasks } from "../../features/tasks";
 import { setTask } from "../../features/task";
 import { setActionToPerform } from "../../features/taskAction";
+import {
+  setTaskDeletionError,
+  setTaskViewError,
+} from "../../features/apiErrors";
 
 function TaskListAndButton() {
-  // const { tasks, setShowForm, setTasks, setTask } = props;
   const dispatch = useDispatch();
   const tasks = useSelector((state) => state.tasks);
+  const { isTaskViewError, isTaskDeletionError } = useSelector(
+    (state) => state.apiErrors
+  );
 
   useEffect(() => {
     let backendTasks = [];
+
     axios
       .get("http://localhost:8080/tasks", {
         headers: {
@@ -25,10 +33,12 @@ function TaskListAndButton() {
       })
       .then((response) => {
         backendTasks = response.data;
-
         dispatch(
           setTasks(backendTasks.map((backendTask) => filterTask(backendTask)))
         );
+      })
+      .catch(() => {
+        dispatch(setTaskViewError(true));
       });
   }, []);
 
@@ -54,11 +64,32 @@ function TaskListAndButton() {
         if (response.status === 200) {
           dispatch(setTasks(tasks.filter((task) => task.id !== id)));
         }
+      })
+      .catch(() => {
+        dispatch(setTaskDeletionError(true));
       });
   };
 
   return (
     <>
+      {isTaskDeletionError && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => dispatch(setTaskDeletionError(false))}
+        >
+          Please try again!!!
+        </Alert>
+      )}
+      {isTaskViewError && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => dispatch(setTaskViewError(false))}
+        >
+          Please try again!!!
+        </Alert>
+      )}
       <h2>Tasks</h2>
       {tasks.map((task) => (
         <div className=" border m-2 rounded p-2 w-100" key={task.id}>

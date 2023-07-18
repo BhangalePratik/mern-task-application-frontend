@@ -25,3 +25,15 @@ Use Redux toolkit. Instead of using createStore, I used configureStore to manage
 #### Solution
 
 Enforce Coding Style
+
+### Can I pass array of task to frontend in API? IF no, then how can I pass it through backend?
+
+#### Solution
+
+NO, You can pass object or string. So, you want to pass the array, stringify it then pass it. Express internally stringify it when you pass the object or array. So even though, you passed, it will be passed as json string.
+
+### Frontend testing is hard. If I test the tree then it will miss CSS
+
+#### Solution
+
+Use visual regression testing

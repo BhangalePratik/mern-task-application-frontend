@@ -4,11 +4,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Formik, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Button from "react-bootstrap/Button";
+import Alert from "react-bootstrap/Alert";
 import { Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 
 import { setIsLoggedIn, setIsSignedUp } from "../../features/user";
+import { setSigningUpError } from "../../features/apiErrors";
 
 const validationSchema = Yup.object().shape({
   email: Yup.string()
@@ -20,26 +22,29 @@ const validationSchema = Yup.object().shape({
 });
 
 function SignUpForm() {
-  const user = useSelector((state) => state.user);
+  const isSignUpError = useSelector((state) => state.apiErrors.isSignUpError);
   const dispatch = useDispatch();
-  const handleSubmit = async ({ email, password }) => {
-    console.log("I am in handle singup function");
-    const response = await axios.post(
-      "http://localhost:8080/users/signup",
-      {
-        email,
-        password,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
+  const handleSubmit = async ({ email, password }, actions) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/users/signup",
+        {
+          email,
+          password,
         },
-      }
-    );
-    localStorage.setItem("jwtToken", response.data);
-    dispatch(setIsSignedUp(true));
-    dispatch(setIsLoggedIn(true));
-    console.log(JSON.stringify(user));
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      localStorage.setItem("jwtToken", response.data);
+      dispatch(setIsSignedUp(true));
+      dispatch(setIsLoggedIn(true));
+    } catch (_error) {
+      actions.resetForm();
+      dispatch(setSigningUpError(true));
+    }
   };
 
   const logInUser = () => {
@@ -48,6 +53,15 @@ function SignUpForm() {
 
   return (
     <>
+      {isSignUpError && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => dispatch(setSigningUpError(false))}
+        >
+          Please try again!!!
+        </Alert>
+      )}
       <h2 className="text-center">Signup</h2>
       <Formik
         initialValues={{
@@ -78,7 +92,7 @@ function SignUpForm() {
             <Form.Group className="mb-3" controlId="password">
               <Form.Label>Password</Form.Label>
               <Field
-                type="text"
+                type="password"
                 name="password"
                 as={Form.Control}
                 className={

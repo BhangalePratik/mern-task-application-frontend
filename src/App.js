@@ -1,6 +1,7 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, Navbar } from "react-bootstrap";
+import Alert from "react-bootstrap/Alert";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -9,12 +10,14 @@ import NewTaskForm from "./components/NewTaskForm/NewTaskForm";
 import TaskListAndButton from "./components/TaskListAndButton/TaskListAndButton";
 import LoginForm from "./components/LoginForm/LoginForm";
 import { setIsLoggedIn } from "./features/user";
+import { setLoggingOutError } from "./features/apiErrors";
 // import TrialForm from "./components/TrialForm";
 
 function App() {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const showForm = useSelector((state) => state.showForm);
+  const { isLogoutError } = useSelector((state) => state.apiErrors);
 
   const handleLogout = (e) => {
     e.preventDefault();
@@ -31,11 +34,23 @@ function App() {
       .then(() => {
         localStorage.removeItem("jwtToken");
         dispatch(setIsLoggedIn(false));
+      })
+      .catch(() => {
+        dispatch(setLoggingOutError(true));
       });
   };
 
   return (
     <div>
+      {isLogoutError && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => dispatch(setLoggingOutError(false))}
+        >
+          Please try again!!!
+        </Alert>
+      )}
       {isLoggedIn ? (
         <div>
           <Navbar

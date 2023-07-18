@@ -6,6 +6,7 @@ import tasks from "./features/tasks";
 import showForm from "./features/showForm";
 import taskAction from "./features/taskAction";
 import submitForm from "./features/submitForm";
+import apiErrors from "./features/apiErrors";
 
 const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ const store = configureStore({
     showForm,
     taskAction,
     submitForm,
+    apiErrors,
   },
 });
 

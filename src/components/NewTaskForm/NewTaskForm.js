@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Formik, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import Alert from "react-bootstrap/Alert";
 import Button from "react-bootstrap/Button";
 import { Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +14,10 @@ import { setTasks } from "../../features/tasks";
 import { setShowForm } from "../../features/showForm";
 import { setSubmitForm } from "../../features/submitForm";
 import { setActionToPerform } from "../../features/taskAction";
+import {
+  setTaskAdditionError,
+  setTaskUpdateError,
+} from "../../features/apiErrors";
 
 const validationSchema = Yup.object().shape({
   id: Yup.string(),
@@ -22,12 +27,18 @@ const validationSchema = Yup.object().shape({
   ),
   time: Yup.string(),
   title: Yup.string()
-    .max(30, "Title should be less than 30 characters")
+    .max(30, "Title should not be more than 30 characters")
     .required("Title is required"),
-  details: Yup.string().max(250, "Details should be less than 250 characters"),
+  details: Yup.string().max(
+    250,
+    "Details should not be more than 250 characters"
+  ),
 });
 
 function NewTaskForm() {
+  const { isTaskAdditionError, isTaskUpdateError } = useSelector(
+    (state) => state.apiErrors
+  );
   const dispatch = useDispatch();
   const task = useSelector((state) => state.task);
   const taskAction = useSelector((state) => state.taskAction);
@@ -53,15 +64,9 @@ function NewTaskForm() {
               t.id === task.id ? task : t
             );
             dispatch(setTasks(updatedTasks));
-            //   dispatch(
-            //     setTask({
-            //       id: "",
-            //       date: "",
-            //       time: "",
-            //       title: "",
-            //       details: "",
-            //     })
-            //   );
+          })
+          .catch(() => {
+            setTaskUpdateError(true);
           });
       } else if (taskAction === "insert") {
         // task is added newly, assign id to it and add in task list
@@ -76,15 +81,9 @@ function NewTaskForm() {
 
             dispatch(setTask(() => filterTask(backendTask)));
             dispatch(setTasks([...tasks, task]));
-            //   dispatch(
-            //     setTask({
-            //       id: "",
-            //       date: "",
-            //       time: "",
-            //       title: "",
-            //       details: "",
-            //     })
-            //   );
+          })
+          .catch(() => {
+            setTaskAdditionError(true);
           });
       }
       dispatch(setActionToPerform(""));
@@ -104,6 +103,24 @@ function NewTaskForm() {
 
   return (
     <>
+      {isTaskAdditionError && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => dispatch(setTaskAdditionError(false))}
+        >
+          Please try again!!!
+        </Alert>
+      )}
+      {isTaskUpdateError && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => dispatch(setTaskUpdateError(false))}
+        >
+          Please try again!!!
+        </Alert>
+      )}
       <h2>New Task</h2>
       <Formik
         initialValues={

@@ -3,12 +3,15 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Formik, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import Alert from "react-bootstrap/Alert";
 import Button from "react-bootstrap/Button";
 import { Container, Form } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 
 import { setIsLoggedIn, setIsSignedUp } from "../../features/user";
+import { setLoggingError } from "../../features/apiErrors";
+
 import "./LoginForm.css";
 import SignUpForm from "../SignUpForm/SignUpForm";
 
@@ -21,23 +24,9 @@ const validationSchema = Yup.object().shape({
 
 function LoginForm() {
   const isSignedUp = useSelector((state) => state.user.isSignedUp);
+  const isLoginError = useSelector((state) => state.apiErrors.isLoginError);
+  // const { email, password } = useSelector((state) => state.user);
   const dispatch = useDispatch();
-  const handleLogin = async ({ email, password }) => {
-    const response = await axios.post(
-      "http://localhost:8080/users/login",
-      {
-        email,
-        password,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    localStorage.setItem("jwtToken", response.data);
-    dispatch(setIsLoggedIn(true));
-  };
 
   const signUpUser = () => {
     dispatch(setIsSignedUp(false));
@@ -47,6 +36,16 @@ function LoginForm() {
     <Container className="w-50">
       {isSignedUp ? (
         <>
+          {isLoginError && (
+            <Alert
+              variant="danger"
+              dismissible
+              onClose={() => dispatch(setLoggingError(false))}
+            >
+              Please try again!!!
+            </Alert>
+          )}
+
           <h2 className="text-center">Login</h2>
           <Formik
             initialValues={{
@@ -55,7 +54,27 @@ function LoginForm() {
             }}
             validationSchema={validationSchema}
             validateOnChange
-            onSubmit={handleLogin}
+            onSubmit={async ({ email, password }, actions) => {
+              try {
+                const response = await axios.post(
+                  "http://localhost:8080/users/login",
+                  {
+                    email,
+                    password,
+                  },
+                  {
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  }
+                );
+                localStorage.setItem("jwtToken", response.data);
+                dispatch(setIsLoggedIn(true));
+              } catch (error) {
+                actions.resetForm();
+                dispatch(setLoggingError(true));
+              }
+            }}
           >
             {(formik) => (
               <Form onSubmit={formik.handleSubmit}>
@@ -79,7 +98,7 @@ function LoginForm() {
                 <Form.Group className="mb-3" controlId="password">
                   <Form.Label>Password</Form.Label>
                   <Field
-                    type="text"
+                    type="password"
                     name="password"
                     as={Form.Control}
                     className={
